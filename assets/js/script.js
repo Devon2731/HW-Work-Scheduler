@@ -1,120 +1,64 @@
-$(document).ready(function(){
+// This sets the variable for displaying the day and date on the webpage.
+const dayDisplayEl = $('#currentDay');
 
-  $("#currentDay").text(moment().format('dddd, MMMM Do'));
- var displayHour; 
- var currentTimeHH = moment().format('H')
- var startTime = 9;  // must be in 24 hours format!!
- var workingHours = 10; // 
+// This handles displaying the day and date.
+function displayDate() {
+  let todaysDate = dayjs().format('dddd, MMMM DD, YYYY');
+  dayDisplayEl.text(todaysDate);
+};
 
- //Creating Time Blocks!! 
- for (var i = 0; i<= workingHours; i++) {
+// This function is called once everything renders on the webpage.
+function plannerHourColorSwitcher() {
+  // Tracks the current hour in the day.
+  let rightNow = dayjs().hour();
 
-     // formatting the time to be displayed in the table for the current day 
-     displayTime = startTime + i; 
-     displayHour = displayHourCalc(displayTime);
+  $(".time-block").each(function () {
+    let hourBlock = parseInt($(this).attr("id").split("hour")[1] * -1);
+    // This Compares the hours in the hour blocks, and adds the matching classes for the matching background colors.
+    if (hourBlock < rightNow) {
+      $(this).removeClass("future");
+      $(this).removeClass("present");
+      $(this).addClass("past");
+    };
+    if (hourBlock === rightNow) {
+      $(this).removeClass("past");
+      $(this).removeClass("future");
+      $(this).addClass("present");
+    };
+    if (hourBlock > rightNow) {
+      $(this).removeClass("present");
+      $(this).removeClass("past");
+      $(this).addClass("future");
 
-     //creating Timeblocks!
-     var rowEl = $('<div>'); 
-     rowEl.addClass ('col-lg-12 col-md-12 col-sm-12 col-12 row');
+    };
+  });
+};
 
-     //Create hour div + hour para 
-     var hourElDiv = $('<div>');
-     hourElDiv.addClass('col-lg-1 col-md-1 col-sm-1 col-1 p-0');
-     var hourEl = $("<p>"); 
-     hourEl.addClass('hour');
-     hourEl.text (displayHour);
+// This is the function for saving user input in the hour blocks.
+$(function () {
+  // This is the event listener for the save button (saveBtn).
+  $(".saveBtn").on("click", function () {
+    var hourText = $(this).siblings(".description").val();
+    var blockHour = $(this).parent().attr("id");
+    // This saves the text from the hour blocks into the local storage.
+    localStorage.setItem(blockHour, hourText);
+  });
 
-     //Append hour col to row
-     hourElDiv.append(hourEl); 
-     rowEl.append(hourElDiv);
-     
-     //Create event div + event textarea 
-     var eventElDiv = $('<div>');
-     eventElDiv.addClass('col-lg-10 col-sm-10 col-sm-10 col-10 p-0');
-     var eventEl = $("<textarea>");
-     eventEl.addClass('textarea description');
-     eventDescID = "event" + i;
-     eventEl.attr('id', eventDescID);
-     if (currentTimeHH > displayTime) {
-         eventEl.addClass('textarea description past');
-         eventEl.attr('readonly', 'readonly');
-     } else if (currentTimeHH < displayTime) {
-         eventEl.addClass('textarea description future');
-     } else {
-         eventEl.addClass('textarea description present');
-     }
+  // This retrieves the user input from the local storage, if there is anything to retrieve.
+  $("#hour-8 .description").val(localStorage.getItem("hour-8"));
+  $("#hour-9 .description").val(localStorage.getItem("hour-9"));
+  $("#hour-10 .description").val(localStorage.getItem("hour-10"));
+  $("#hour-11 .description").val(localStorage.getItem("hour-11"));
+  $("#hour-12 .description").val(localStorage.getItem("hour-12"));
+  $("#hour-13 .description").val(localStorage.getItem("hour-13"));
+  $("#hour-14 .description").val(localStorage.getItem("hour-14"));
+  $("#hour-15 .description").val(localStorage.getItem("hour-15"));
+  $("#hour-16 .description").val(localStorage.getItem("hour-16"));
+  $("#hour-17 .description").val(localStorage.getItem("hour-17"));
 
-     //Append event to row 
-     eventElDiv.append(eventEl);
-     rowEl.append(eventElDiv);
-
-     //Create event div + event textarea 
-     var buttonElDiv = $('<div>');
-     buttonElDiv.addClass('col-lg-1 col-md-1 col-sm-1 col-1 custom-btnele p-0');
-     var buttonEl = $("<button>");
-     buttonEl.addClass('saveBtn');
-     var btnID = i;
-     buttonEl.attr('id', btnID);
-     
-     // Create icon 
-     var iconEl = $('<i>');
-     iconEl.addClass('fas fa-save');
-     buttonEl.append(iconEl);
-
-     //Append event to row 
-     buttonElDiv.append(buttonEl);
-     rowEl.append(buttonElDiv);
-
-     $(".container").append(rowEl);
-     
-     retrieveEventDetails(i);
-     
- }
-
- 
- function displayHourCalc(displayTime) {  
-
-     var displayHour;
-     
-     if (displayTime >= 24) {
-         return;
-      } 
-  
-      if (displayTime > 0 && displayTime < 12) {
-          displayHour = displayTime + " AM";
-      } else if (displayTime < 24 && displayTime > 12) {
-          displayHour = (displayTime - 12) + " PM";
-      } else if (displayTime == 24) {
-          displayHour = (displayTime - 12) + " AM";
-      } else if (displayTime == 12) {
-          displayHour = displayTime + " PM";
-      } else { 
-          console.log ('invalid display time')
-          return;
-      };
-      
-      return displayHour;
- }
-
- //Storing event description in localStorage unpon button click
- var saveBtn = $('.saveBtn');
- saveBtn.on('click',function () {
-      var eventId = $(this).attr('id');
-      var eventDesc = $(this).parent().siblings().children('.description').val();
-      localStorage.setItem(eventId,eventDesc);
-
- } );
- 
- //function to retrieve local storage value!!
- function retrieveEventDetails(storageKey) {
-     var eventDesc = localStorage.getItem(storageKey);
-     console.log(eventDesc);
-     var eventDescID = "event" + storageKey;
-     if (eventDesc) {
-         console.log(eventDescID);
-         $('#'+ eventDescID).text(eventDesc);
-      }
-
- };
+  plannerHourColorSwitcher();
 
 });
+
+displayDate();
+setInterval(displayDate, 1000);
